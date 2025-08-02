@@ -1,23 +1,19 @@
--- EggESPModule.lua
-
-local EggESPModule = {}
+-- EggESPLoader.lua
 
 local eggConfigs = {
     ["Bug Egg"] = {
-        color = Color3.fromRGB(255, 105, 180), -- pink
+        color = Color3.fromRGB(255, 105, 180),
         label = "🐞 Bug Egg"
     },
     ["Zen Egg"] = {
-        color = Color3.fromRGB(0, 255, 255), -- cyan
+        color = Color3.fromRGB(0, 255, 255),
         label = "🧘 Zen Egg"
     }
 }
 
-function EggESPModule.ApplyESPToEgg(egg)
-    local config = eggConfigs[egg.Name]
-    if not config or not egg:IsA("Model") then return end
+local function applyESP(egg, config)
+    if not egg:IsA("Model") then return end
 
-    -- Highlight
     local highlight = Instance.new("Highlight")
     highlight.Adornee = egg
     highlight.FillColor = config.color
@@ -25,7 +21,6 @@ function EggESPModule.ApplyESPToEgg(egg)
     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     highlight.Parent = egg
 
-    -- Billboard label
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "EggESPLabel"
     billboard.Adornee = egg:FindFirstChild("Head") or egg:FindFirstChildWhichIsA("BasePart")
@@ -45,16 +40,23 @@ function EggESPModule.ApplyESPToEgg(egg)
     textLabel.Parent = billboard
 end
 
-function EggESPModule.Setup(folder)
-    -- Apply ESP to existing eggs
+local function setupESP()
+    local folder = workspace:FindFirstChild("Eggs")
+    if not folder then return end
+
     for _, egg in ipairs(folder:GetChildren()) do
-        EggESPModule.ApplyESPToEgg(egg)
+        local cfg = eggConfigs[egg.Name]
+        if cfg then
+            applyESP(egg, cfg)
+        end
     end
 
-    -- Watch for new eggs
     folder.ChildAdded:Connect(function(egg)
-        EggESPModule.ApplyESPToEgg(egg)
+        local cfg = eggConfigs[egg.Name]
+        if cfg then
+            applyESP(egg, cfg)
+        end
     end)
 end
 
-return EggESPModule
+setupESP()
